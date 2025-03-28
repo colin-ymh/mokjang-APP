@@ -123,6 +123,35 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   return nullptr;
 }
 
+// iOS 9 이상에서 사용되는 메서드
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  // 1) 네이버
+  //    여기서 "yourNaverScheme" 자리에 Info.plist의 CFBundleURLSchemes에 등록한 실제 스킴을 넣어주세요.
+  //    예: if ([url.scheme isEqualToString:@"mokjang"])
+  //    네이버 공식 라이브러리를 사용한다면 아래 코드로 처리:
+  if ([url.scheme isEqualToString:@"yourNaverScheme"]) {
+    return [[NaverThirdPartyLoginConnection getSharedInstance]
+            application:application
+            openURL:url
+            options:options];
+  }
+
+  // 2) 카카오
+  //    RNKakaoLogins 라이브러리를 사용하는 경우
+  if ([RNKakaoLogins isKakaoTalkLoginUrl:url]) {
+    return [RNKakaoLogins handleOpenUrl:url];
+  }
+
+  // 3) 혹시 다른 딥링크(RCTLinkingManager 등)를 쓰신다면, 여기에 추가
+  // return [RCTLinkingManager application:application openURL:url options:options];
+
+  // 위 어떤 조건에도 해당 안 되면 YES 또는 NO (기본값)
+  return YES;
+}
+
 - (id<RCTTurboModule>)getModuleInstanceFromClass:(Class)moduleClass
 {
   return RCTAppSetupDefaultModuleFromClass(moduleClass);

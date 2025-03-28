@@ -35,7 +35,7 @@ const CustomWebview = ({
       <WebView
         ref={webRef}
         style={styles.webview}
-        source={{uri: `http://172.20.10.4:3001/${uri}`}}
+        source={{uri: `http://192.168.0.171:3001/${uri}`}}
         // source={{uri: `http://localhost:3000/${uri}`}}
         injectedJavaScript={metaTagInjection}
         onMessage={msg => {
