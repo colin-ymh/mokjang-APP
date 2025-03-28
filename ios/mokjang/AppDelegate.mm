@@ -4,7 +4,24 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 
+//
+// 1) 만약 New Arch가 켜져 있을 때만 RCTAppSetupUtils 헤더를 import
+// 2) 그렇지 않을 땐, 동일한 시그니처의 함수를 직접 정의(빈 함수 or 기존 RCTRootView 활용)
+//
+#if RCT_NEW_ARCH_ENABLED
 #import <React/RCTAppSetupUtils.h>
+#else
+static inline void RCTAppSetupPrepareApp(UIApplication *application) {
+  // New Arch를 안 쓰는 경우에는 특별한 초기화가 필요 없으면 비워둡니다.
+}
+
+static inline UIView *RCTAppSetupDefaultRootView(RCTBridge *bridge, NSString *moduleName, NSDictionary *initProps) {
+  // 구 아키텍처에서는 기존 RCTRootView를 반환해주면 됩니다.
+  return [[RCTRootView alloc] initWithBridge:bridge
+                                  moduleName:moduleName
+                           initialProperties:initProps];
+}
+#endif
 
 #if RCT_NEW_ARCH_ENABLED
 #import <React/CoreModulesPlugins.h>
@@ -13,7 +30,6 @@
 #import <React/RCTSurfacePresenter.h>
 #import <React/RCTSurfacePresenterBridgeAdapter.h>
 #import <ReactCommon/RCTTurboModuleManager.h>
-
 #import <react/config/ReactNativeConfig.h>
 
 static NSString *const kRNConcurrentRoot = @"concurrentRoot";
@@ -31,19 +47,25 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  // New Arch ON/OFF 관계없이 동일 코드 사용
   RCTAppSetupPrepareApp(application);
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
 
 #if RCT_NEW_ARCH_ENABLED
+  // 새 아키텍처에서만 필요한 설정
   _contextContainer = std::make_shared<facebook::react::ContextContainer const>();
   _reactNativeConfig = std::make_shared<facebook::react::EmptyReactNativeConfig const>();
   _contextContainer->insert("ReactNativeConfig", _reactNativeConfig);
-  _bridgeAdapter = [[RCTSurfacePresenterBridgeAdapter alloc] initWithBridge:bridge contextContainer:_contextContainer];
+
+  _bridgeAdapter = [[RCTSurfacePresenterBridgeAdapter alloc] initWithBridge:bridge
+                                                           contextContainer:_contextContainer];
   bridge.surfacePresenter = _bridgeAdapter.surfacePresenter;
 #endif
 
   NSDictionary *initProps = [self prepareInitialProps];
+  
+  // New Arch ON/OFF 관계없이 동일 코드 사용
   UIView *rootView = RCTAppSetupDefaultRootView(bridge, @"mokjang", initProps);
 
   if (@available(iOS 13.0, *)) {
@@ -60,28 +82,19 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   return YES;
 }
 
-/// This method controls whether the `concurrentRoot`feature of React18 is turned on or off.
-///
-/// @see: https://reactjs.org/blog/2022/03/29/react-v18.html
-/// @note: This requires to be rendering on Fabric (i.e. on the New Architecture).
-/// @return: `true` if the `concurrentRoot` feture is enabled. Otherwise, it returns `false`.
-- (BOOL)concurrentRootEnabled
-{
-  // Switch this bool to turn on and off the concurrent root
-  return true;
-}
-
 - (NSDictionary *)prepareInitialProps
 {
   NSMutableDictionary *initProps = [NSMutableDictionary new];
 
 #ifdef RCT_NEW_ARCH_ENABLED
-  initProps[kRNConcurrentRoot] = @([self concurrentRootEnabled]);
+  // 사용한다면, Fabric/ConcurrentRoot 등에 필요한 props 지정
+  initProps[@"concurrentRoot"] = @(YES);
 #endif
 
   return initProps;
 }
 
+// RN 프로젝트에서 JS 코드 경로
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
 #if DEBUG
@@ -103,7 +116,7 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
   return RCTAppSetupDefaultJsExecutorFactory(bridge, _turboModuleManager);
 }
 
-#pragma mark RCTTurboModuleManagerDelegate
+#pragma mark - RCTTurboModuleManagerDelegate
 
 - (Class)getModuleClassFromName:(const char *)name
 {
@@ -117,38 +130,17 @@ static NSString *const kRNConcurrentRoot = @"concurrentRoot";
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const std::string &)name
-                                                     initParams:
-                                                         (const facebook::react::ObjCTurboModule::InitParams &)params
+                                                     initParams:(const facebook::react::ObjCTurboModule::InitParams &)params
 {
   return nullptr;
 }
 
-// iOS 9 이상에서 사용되는 메서드
+// 예시: iOS 9+ 딥링크 처리
 - (BOOL)application:(UIApplication *)application
             openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
 {
-  // 1) 네이버
-  //    여기서 "yourNaverScheme" 자리에 Info.plist의 CFBundleURLSchemes에 등록한 실제 스킴을 넣어주세요.
-  //    예: if ([url.scheme isEqualToString:@"mokjang"])
-  //    네이버 공식 라이브러리를 사용한다면 아래 코드로 처리:
-  if ([url.scheme isEqualToString:@"yourNaverScheme"]) {
-    return [[NaverThirdPartyLoginConnection getSharedInstance]
-            application:application
-            openURL:url
-            options:options];
-  }
-
-  // 2) 카카오
-  //    RNKakaoLogins 라이브러리를 사용하는 경우
-  if ([RNKakaoLogins isKakaoTalkLoginUrl:url]) {
-    return [RNKakaoLogins handleOpenUrl:url];
-  }
-
-  // 3) 혹시 다른 딥링크(RCTLinkingManager 등)를 쓰신다면, 여기에 추가
-  // return [RCTLinkingManager application:application openURL:url options:options];
-
-  // 위 어떤 조건에도 해당 안 되면 YES 또는 NO (기본값)
+  // 네이버/카카오/RCTLinkingManager 등등
   return YES;
 }
 
