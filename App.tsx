@@ -1,11 +1,10 @@
-import Root from './src/Root';
-import LoginScreen from './src/screens/login/LoginScreen';
+import Root from './src/screens/Root';
+import './src/locales/i18n';
 
 const App = () => {
   return (
     <>
-      {/*<Root />*/}
-      <LoginScreen />
+      <Root />
     </>
   );
 };

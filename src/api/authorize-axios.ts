@@ -10,27 +10,46 @@ const authorizeAxios = axios.create({
 /**
  * ✅ 쿠키에 Access Token과 Refresh Token 저장
  */
-export async function setAuthorizationToken(
-  accessToken: string,
-  refreshToken?: string,
-) {
+export async function setAuthorizationToken({
+  temporalToken,
+  accessToken,
+  refreshToken,
+}: {
+  temporalToken?: string;
+  accessToken?: string;
+  refreshToken?: string;
+}) {
   try {
-    // ✅ Base64 인코딩 제거 (원본 JWT를 그대로 저장)
-    await CookieManager.set(TEST_SERVER_URL, {
-      name: 'MJAT',
-      value: accessToken,
-      path: '/',
-      secure: false, // HTTPS 환경이면 true
-      httpOnly: false, // 클라이언트에서 접근 가능
-    });
+    // ✅ Access Token 저장
+    if (accessToken) {
+      await CookieManager.set(TEST_SERVER_URL, {
+        name: 'MJAT',
+        value: accessToken,
+        path: '/',
+        secure: false, // HTTPS 환경이면 true
+        httpOnly: false, // 클라이언트에서 접근 가능
+      });
+    }
 
+    // ✅ Refresh Token 저장
     if (refreshToken) {
       await CookieManager.set(TEST_SERVER_URL, {
         name: 'MJRT',
         value: refreshToken,
         path: '/',
         secure: false,
-        httpOnly: true, // 보안 강화를 위해 true (클라이언트에서 접근 불가)
+        httpOnly: true, // 보안 강화를 위해 true
+      });
+    }
+
+    // ✅ Temporal Token 저장
+    if (temporalToken) {
+      await CookieManager.set(TEST_SERVER_URL, {
+        name: 'MJTT',
+        value: temporalToken,
+        path: '/',
+        secure: false,
+        httpOnly: false, // 필요에 따라 true로 설정 가능
       });
     }
 
@@ -50,9 +69,12 @@ authorizeAxios.interceptors.request.use(
     try {
       const cookies = await CookieManager.get(TEST_SERVER_URL);
       const accessToken = cookies.MJAT?.value;
+      const temporalToken = cookies.MJTT?.value;
 
       if (accessToken && config.headers) {
         console.log('✅ Cookie-based Authentication:', accessToken);
+      } else if (temporalToken && config.headers) {
+        console.log('✅ Cookie-based Temporal Auth:', temporalToken);
       } else {
         console.log('❌ No Access Token found in cookies');
       }
@@ -70,7 +92,6 @@ authorizeAxios.interceptors.request.use(
 authorizeAxios.interceptors.response.use(
   response => response,
   async error => {
-    console.log(error);
     if (error.response?.status === 401) {
       const originalRequest = error.config;
 

@@ -5,6 +5,7 @@ import WebView, {
   WebViewMessageEvent,
   WebViewProps,
 } from '@dr.pogodin/react-native-webview';
+import {WEBVIEW_URL} from '../../../constants/url';
 
 interface CustomWebviewProps extends WebViewProps {
   webRef: React.RefObject<WebView>;
@@ -35,7 +36,7 @@ const CustomWebview = ({
       <WebView
         ref={webRef}
         style={styles.webview}
-        source={{uri: `http://192.168.0.171:3001/${uri}`}}
+        source={{uri: `${WEBVIEW_URL}/${uri}`}}
         // source={{uri: `http://localhost:3000/${uri}`}}
         injectedJavaScript={metaTagInjection}
         onMessage={msg => {
@@ -50,6 +51,8 @@ const CustomWebview = ({
           const {nativeEvent} = syntheticEvent;
           console.log('WebView error: ', nativeEvent);
         }}
+        sharedCookiesEnabled={true} // iOS/Android에서 네이티브 쿠키 공유 활성화
+        thirdPartyCookiesEnabled={true} // 서드파티 쿠키 허용
         {...webViewProps}
       />
     </SafeAreaView>

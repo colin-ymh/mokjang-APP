@@ -1156,6 +1156,8 @@ PODS:
   - RNGoogleSignin (13.2.0):
     - GoogleSignIn (~> 7.1)
     - React-Core
+  - RNLocalize (3.4.1):
+    - React-Core
   - RNNaverLogin (4.0.4):
     - glog
     - naveridlogin-sdk-ios (= 4.2.3)
@@ -1166,6 +1168,8 @@ PODS:
     - RCT-Folly (= 2022.05.16.00)
     - React-Core
     - React-RCTImage
+  - RNSVG (15.11.2):
+    - React-Core
   - SocketRocket (0.6.1)
   - Yoga (1.14.0)
 
@@ -1248,8 +1252,10 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNGoogleSignin (from `../node_modules/@react-native-google-signin/google-signin`)"
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - "RNNaverLogin (from `../node_modules/@react-native-seoul/naver-login`)"
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNSVG (from `../node_modules/react-native-svg`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -1385,10 +1391,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNGoogleSignin:
     :path: "../node_modules/@react-native-google-signin/google-signin"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNNaverLogin:
     :path: "../node_modules/@react-native-seoul/naver-login"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1467,8 +1477,10 @@ SPEC CHECKSUMS:
   ReactCommon: 851280fb976399ca1aabc74cc2c3612069ea70a2
   RNCAsyncStorage: addfc2cb6511dbe199c56c6b26ede383b6c38919
   RNGoogleSignin: ee2938633d996756819e3212c8e0f7f696b380d0
+  RNLocalize: 06991b9c31e7a898a9fa6ddb204ce0f53a967248
   RNNaverLogin: 98adb91cc1843c81e4bc9b30138c4ecee427420f
   RNScreens: 787c8cbe4b1d8163d3c7acb8a5aab4fc68bf1f20
+  RNSVG: d3dcdd1472cc7e82b0654c48bf6abf893485b074
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 44003f970aa541b79dfdd59cf236fda41bd5890f
 

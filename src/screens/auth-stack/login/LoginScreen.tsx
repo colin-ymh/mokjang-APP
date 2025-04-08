@@ -1,16 +1,28 @@
 import React, {useState} from 'react';
 import {View, TextInput, Pressable, Text, StyleSheet} from 'react-native';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {useDispatch} from 'react-redux';
 
-import {BLANK} from '../../constants/constant';
-import {AuthApi} from '../../api/auth/auth.api';
-import {setAuthorizationToken} from '../../api/authorize-axios';
-import {UserApi} from '../../api/user/user.api';
-import axios from 'axios';
-import {TEST_SERVER_URL} from '../../constants/url';
+import {AuthApi} from '../../../api/auth/auth.api';
+import {setAuthorizationToken} from '../../../api/authorize-axios';
+import {UserApi} from '../../../api/user/user.api';
+import {BLANK} from '../../../constants/common';
+import {
+  AUTH_STACK,
+  AuthStackParams,
+} from '../../../constants/navigator/navigator';
+import {setUser} from '../../../redux/reducers/user-reducer';
 
-const TestLoginScreen = () => {
+type LoginScreenProps = NativeStackScreenProps<
+  AuthStackParams,
+  typeof AUTH_STACK.LOGIN.NAME
+>;
+
+const LoginScreen = ({navigation}: LoginScreenProps) => {
   const authApi = new AuthApi(false);
   const userApi = new UserApi(false);
+
+  const dispatch = useDispatch();
 
   const [userId, setUserId] = useState<string>(BLANK);
   const [userPassword, setUserPassword] = useState<string>(BLANK);
@@ -18,7 +30,7 @@ const TestLoginScreen = () => {
   const onPressLogin = async () => {
     try {
       // await axios.get(`${TEST_SERVER_URL}/error/internal-server`);
-      const response = await authApi.getTestAuth({
+      const response = await authApi.getMobileAuth({
         provider: userId,
         providerId: userPassword,
       });
@@ -32,7 +44,10 @@ const TestLoginScreen = () => {
 
         const userResponse = await userApi.getUser();
         console.log(userResponse.data);
+
         if (userResponse.data) {
+          dispatch(setUser(userResponse.data));
+          navigation.navigate(AUTH_STACK.MAIN.NAME);
         }
       }
     } catch (error) {
@@ -101,4 +116,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TestLoginScreen;
+export default LoginScreen;

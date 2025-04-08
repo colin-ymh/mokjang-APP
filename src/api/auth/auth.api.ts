@@ -3,6 +3,7 @@ import qs from 'query-string';
 
 import {SERVER_URL, TEST_SERVER_URL} from '../../constants/url';
 import authorizeAxios from '../authorize-axios';
+import {OAUTH_PROVIDER} from '../../constants/common';
 
 export enum IS_TEST {
   INTERNAL_TEST = 'internalTest',
@@ -21,7 +22,7 @@ type getOAuthParams = {
 };
 
 type getTestAuthParams = {
-  provider: string;
+  provider: OAUTH_PROVIDER;
   providerId: string;
 };
 
@@ -79,18 +80,18 @@ export class AuthApi {
   };
 
   /**
-   * 테스트용 로그인
+   * 로그인
    * @param {getTestAuthParams} params
    * @returns {Promise<AxiosResponse>}
    */
-  public getTestAuth = async (
+  public getMobileAuth = async (
     params: getTestAuthParams,
   ): Promise<AxiosResponse> => {
     const queryParams = qs.stringify({...params, loginOption: 'mobile'});
-    const url = `${this._url}/auth/test/sign-in?${queryParams}`;
+    const url = `${this._url}/auth/mobile-login?${queryParams}`;
 
     try {
-      return await axios.get(url.toString());
+      return await axios.post(url.toString(), params);
     } catch (serverError: any) {
       throw serverError;
       // if (serverError.response) {
