@@ -2,10 +2,7 @@ import React, {useEffect} from 'react';
 import {Button, View} from 'react-native';
 
 // [구글 로그인 관련]
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 // [카카오 로그인 관련]
 import {

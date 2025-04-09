@@ -1,24 +1,25 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {useDispatch, useSelector} from 'react-redux';
+
+import Loading from '../../atoms/common/loading/loading';
+import ToastPopup from '../../atoms/common/popup/toast-popup';
+import {TOAST_DIRECTION} from '../../atoms/common/popup/toast-popup.view';
+import {AuthApi, IS_TEST} from '../../../api/auth/auth.api';
+import {UserApi} from '../../../api/user/user.api';
+import {setAuthorizationToken} from '../../../api/authorize-axios';
 
 import RequestVerifyView from './request-verify.view';
 import {BLANK} from '../../../constants/common';
 import {getFormattedMobilePhone, getFormattedName} from '../../../utils/format';
-import {AuthApi, IS_TEST} from '../../../api/auth/auth.api';
-import {UserApi} from '../../../api/user/user.api';
-import Loading from '../../atoms/common/loading/loading';
-import ToastPopup from '../../atoms/common/popup/toast-popup';
 import {DESTRUCTIVE} from '../../../constants/style/color';
-import {TOAST_DIRECTION} from '../../atoms/common/popup/toast-popup.view';
-import {useDispatch, useSelector} from 'react-redux';
 import {setUser} from '../../../redux/reducers/user-reducer';
+import {RootState} from '../../../redux/store';
 import {
   AUTH_STACK,
   AuthStackParams,
 } from '../../../constants/navigator/navigator';
-import {setAuthorizationToken} from '../../../api/authorize-axios';
-import {RootState} from '../../../redux/store';
 
 const RequestVerify = () => {
   const dispatch = useDispatch();
@@ -104,27 +105,28 @@ const RequestVerify = () => {
     setIsConsent(value);
   };
 
+  // 회원 가입 완료 버튼 이벤트
   const onPressDone = async () => {
     setIsLoading(true);
     try {
       const response = await authApi.getSignIn({
         privacyPolicyAgreed: isVerified,
       });
-      console.log(response.data);
 
       if (response.status === 201 && provider) {
+        // 로컬에 저장해둔 provider, providerId 재활용
         const serverResponse = await authApi.getMobileAuth({
           provider,
           providerId,
         });
 
         if (serverResponse.data.accessToken) {
-          // 토큰 설정 -> 사용자 정보 조회 -> 메인 화면 이동
           await setAuthorizationToken({
             accessToken: serverResponse.data.accessToken,
             refreshToken: serverResponse.data.refreshToken,
           });
 
+          // 로컬에 사용자 정보 저장
           const userResponse = await userApi.getUser();
           if (userResponse.data) {
             dispatch(setUser(userResponse.data));
@@ -133,13 +135,13 @@ const RequestVerify = () => {
         }
       }
     } catch (error) {
-      console.log('로그인 실패:', error);
       setThrownError(error instanceof Error ? error : new Error(String(error)));
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 인증시간 타이머
   useEffect(() => {
     let timer: number | undefined;
 
