@@ -1,4 +1,4 @@
-import AuthStackNav from '../navigators/auth-stack-nav';
+import AuthStack from '../navigators/auth-stack';
 import {NavigationContainer} from '@react-navigation/native';
 
 import {Provider} from 'react-redux';
@@ -8,7 +8,7 @@ const Root = () => {
   return (
     <Provider store={Store}>
       <NavigationContainer>
-        <AuthStackNav />
+        <AuthStack />
       </NavigationContainer>
     </Provider>
   );

@@ -1,10 +1,7 @@
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 
-import OauthList from '../../../components/organisms/login-screen/oauth-list';
-import {
-  AUTH_STACK,
-  AuthStackParams,
-} from '../../../constants/navigator/navigator';
+import OauthList from '../../components/organisms/login-screen/oauth-list';
+import {AUTH_STACK, AuthStackParams} from '../../constants/navigator/navigator';
 
 type LoginScreenProps = NativeStackScreenProps<
   AuthStackParams,

@@ -1,4 +1,4 @@
-import RegisterContainer from '../../../components/organisms/register-screen/register-container';
+import RegisterContainer from '../../components/organisms/register-screen/register-container';
 
 const RegisterScreen = () => {
   return (

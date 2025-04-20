@@ -20,11 +20,24 @@ const CustomWebview = ({
   ...webViewProps
 }: CustomWebviewProps): React.JSX.Element => {
   const metaTagInjection = `
-    const meta = document.createElement('meta');
-    meta.setAttribute('name', 'viewport');
-    meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-    document.head.appendChild(meta);
-    true;
+  // 1) 뷰포트 메타태그
+  const meta = document.createElement('meta');
+  meta.setAttribute('name', 'viewport');
+  meta.setAttribute('content',
+    'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no'
+  );
+  document.head.appendChild(meta);
+
+  // 2) iOS auto-zoom 방지 (input 폰트 크기 강제 16px 이상)
+  const style = document.createElement('style');
+  style.innerHTML = \`
+    input, select, textarea {
+      font-size: 16px;
+    }
+  \`;
+  document.head.appendChild(style);
+
+  true;
 `;
 
   const getMessage = (msg: WebViewMessageEvent): object => {
